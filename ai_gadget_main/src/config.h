@@ -1,0 +1,69 @@
+
+
+// I2C Pins
+#define I2C_SDA_PIN GPIO_NUM_1
+#define I2C_SCL_PIN GPIO_NUM_2
+
+// ADC Pins
+#define ADC_BAT_PIN GPIO_NUM_3
+#define LIGHT_ADC_PIN GPIO_NUM_18
+
+// Touch Input
+#define TOUCH_PIN GPIO_NUM_4
+
+// Max98357 Amplifier (AMP) Pins
+#define AMP_DIN_PIN GPIO_NUM_5
+#define AMP_GAIN_PIN GPIO_NUM_6
+#define AMP_SD_PIN GPIO_NUM_7
+#define AMP_BCLK_PIN GPIO_NUM_8
+#define AMP_LRCLK_PIN GPIO_NUM_9
+
+#define AUDIO_I2S_SPK_GPIO_DOUT GPIO_NUM_5
+#define AUDIO_I2S_SPK_GPIO_BCLK GPIO_NUM_8
+#define AUDIO_I2S_SPK_GPIO_LRCK GPIO_NUM_9
+// INMP441 Microphone (MIC) Pins
+#define MIC_EN_PIN GPIO_NUM_10
+#define MIC_WS_PIN GPIO_NUM_11
+#define MIC_SCK_PIN GPIO_NUM_12
+#define MIC_SD_PIN GPIO_NUM_13
+
+#define AUDIO_I2S_MIC_GPIO_WS   GPIO_NUM_11
+#define AUDIO_I2S_MIC_GPIO_SCK  GPIO_NUM_12
+#define AUDIO_I2S_MIC_GPIO_DIN  GPIO_NUM_13
+
+// SD Card Pins
+#define SD_CLK_PIN GPIO_NUM_15
+#define SD_CMD_PIN GPIO_NUM_16
+#define SD_D3_PIN GPIO_NUM_17
+#define SD_D2_PIN GPIO_NUM_18
+#define SD_D1_PIN GPIO_NUM_21
+#define SD_D0_PIN GPIO_NUM_38
+#define SD_EN_PIN GPIO_NUM_46
+
+#define SD_PWD_ON 0        // SD卡电源开关，8开启，1关闭
+#define SD_PWD_OFF 1       // SD卡电源开关，8开启，1关闭
+
+// Gyroscope (GYRO) Pins
+#define GYRO_INT1_PIN GPIO_NUM_39
+
+// RTC (Real-Time Clock) Pins
+#define RTC_INT_PIN GPIO_NUM_40
+
+// ADC Battery Enable Pin
+#define ADC_BAT_EN_PIN GPIO_NUM_41
+
+// Power Enable Pins
+#define VCC_EN_PIN GPIO_NUM_42
+#define LCD_EN_PIN GPIO_NUM_45
+
+// UART Pins
+#define UART_RX_PIN GPIO_NUM_47
+#define UART_TX_PIN GPIO_NUM_48
+
+#define AP_SSID_PREFIX   "AI-Gadget"
+#define AP_PASSWORD      "ai123456"
+#define HOST_NAME        "main.gadget.ai"
+
+#define AUDIO_INPUT_SAMPLE_RATE  16000
+#define AUDIO_OUTPUT_SAMPLE_RATE 24000
+#define AUDIO_DEFAULT_OUTPUT_VOLUME 80

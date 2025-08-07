@@ -1,0 +1,1 @@
+GEN_CSRCS += lv_font_deyihei_40.c lv_font_montserratMedium_16.c lv_font_deyihei_32.c

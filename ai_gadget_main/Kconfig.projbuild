@@ -1,0 +1,7 @@
+menu "Main Board Configuration"
+
+config WEATHER_API_KEY
+    string "Weather API Key"
+    default ""
+
+endmenu

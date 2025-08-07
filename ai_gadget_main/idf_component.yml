@@ -1,0 +1,12 @@
+dependencies:
+  idf: ^5.3
+  k0i05/esp_ahtxx: ^1.2.6
+  k0i05/esp_sgp4x: ^1.2.6
+description: AI Gadget main code for ESP-IDF using xiaozhi
+files:
+  exclude:
+  - .git
+license: MIT
+repository: https://github.com/jecelyin/AI-Gadget
+url: https://github.com/jecelyin/AI-Gadget
+version: 1.0.0
