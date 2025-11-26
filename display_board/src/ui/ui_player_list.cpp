@@ -8,6 +8,8 @@
 #include <vector>
 
 static lv_obj_t *list;
+static lv_obj_t *img_prev;
+static lv_obj_t *img_next;
 static lv_style_t style_scrollbar;
 static lv_style_t style_btn;
 static lv_style_t style_button_pr;
@@ -20,10 +22,24 @@ static bool update_scroll_running = false;
 // 在全局或适当作用域定义loading状态变量
 static bool is_loading = false;
 static lv_obj_t *loading_spinner = NULL;
+// FileMeta data;
 
 static lv_obj_t *add_audio_list_button(lv_obj_t *parent, const FileMeta &file);
 static lv_obj_t *add_folder_list_button(lv_obj_t *parent,
                                         const FileMeta &folder);
+static void load_data(uint16_t page);
+
+static void prev_btn_click_event_cb(lv_event_t *e) {
+  LV_LOG_USER("Previous track");
+  uint16_t curr_page = player_get_curr_page();
+  load_data(curr_page - 1);
+}
+
+static void next_btn_click_event_cb(lv_event_t *e) {
+  LV_LOG_USER("Next track");
+  uint16_t curr_page = player_get_curr_page();
+  load_data(curr_page + 1);
+}
 
 void player_notify_data_clear() {
   lv_obj_t *child = lv_obj_get_child(list, 0);
@@ -58,18 +74,22 @@ static void set_list_loading(lv_obj_t *list, bool loading) {
 
     // 禁用滚动和点击
     lv_obj_add_state(list, LV_STATE_DISABLED);
-    lv_obj_clear_flag(list, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_add_state(list, LV_STATE_DISABLED);
+    lv_obj_add_state(list, LV_STATE_DISABLED);
+    // lv_obj_clear_flag(list, LV_OBJ_FLAG_SCROLLABLE);
   } else {
-    if(loading_spinner == NULL) {
+    if (loading_spinner == NULL) {
       LV_LOG_ERROR("loading_spinner is NULL!");
       return;
     }
     // 隐藏loading spinner
-    // lv_obj_add_flag(loading_spinner, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(loading_spinner, LV_OBJ_FLAG_HIDDEN);
 
     // 启用滚动和点击
     lv_obj_clear_state(list, LV_STATE_DISABLED);
-    lv_obj_add_flag(list, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_clear_state(list, LV_STATE_DISABLED);
+    lv_obj_clear_state(list, LV_STATE_DISABLED);
+    // lv_obj_add_flag(list, LV_OBJ_FLAG_SCROLLABLE);
   }
 }
 
@@ -164,7 +184,6 @@ static void folder_btn_click_event_cb(lv_event_t *e) {
                reinterpret_cast<const uint8_t *>(data->fileName),
                strlen(data->fileName) + 1);
 }
-
 static lv_obj_t *add_folder_list_button(lv_obj_t *parent,
                                         const FileMeta &folder) {
   const char *title = folder.fileName;
@@ -183,19 +202,27 @@ static lv_obj_t *add_folder_list_button(lv_obj_t *parent,
   lv_obj_add_style(btn, &style_button_dis, LV_STATE_DISABLED);
   lv_obj_add_event_cb(btn, folder_btn_click_event_cb, LV_EVENT_CLICKED, NULL);
 
-  // lv_obj_add_state(btn, LV_STATE_DISABLED);
+  // 设置 Flex 布局 —— 水平排列，垂直居中对齐
+  lv_obj_set_flex_flow(btn, LV_FLEX_FLOW_ROW);
+  lv_obj_set_flex_align(btn,
+                        LV_FLEX_ALIGN_START,   // 主轴起始对齐，元素从左往右排
+                        LV_FLEX_ALIGN_CENTER,  // 交叉轴垂直居中
+                        LV_FLEX_ALIGN_CENTER); // 内容整体居中
 
+  // ---- 左侧图标 ----
   lv_obj_t *icon = lv_image_create(btn);
   lv_image_set_src(icon, &img_player_list_folder);
-  lv_obj_set_grid_cell(icon, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_CENTER, 0,
-                       2);
+  lv_obj_set_style_pad_right(icon, 12, 0); // 图标与文字间距
 
+  // ---- 中间标题 ----
   lv_obj_t *title_label = lv_label_create(btn);
   lv_label_set_text(title_label, title);
-  lv_obj_set_grid_cell(title_label, LV_GRID_ALIGN_START, 1, 1,
-                       LV_GRID_ALIGN_CENTER, 0, 2);
   lv_obj_add_style(title_label, &style_title, 0);
 
+  // 关键：让标题自动填充中间剩余空间
+  lv_obj_set_flex_grow(title_label, 1);
+
+  // ---- 底部边框图片（不参与布局） ----
   LV_IMAGE_DECLARE(img_player_list_border);
   lv_obj_t *border = lv_image_create(btn);
   lv_image_set_src(border, &img_player_list_border);
@@ -228,12 +255,22 @@ static lv_obj_t *add_audio_list_button(lv_obj_t *parent, const FileMeta &file) {
   const char *title = file.fileName;
 
   lv_obj_t *btn = lv_obj_create(parent);
+  // lv_obj_t *cont = lv_obj_create(btn);
   lv_obj_remove_style_all(btn);
+  // lv_obj_remove_style_all(cont);
+  // lv_obj_set_layout(btn, LV_LAYOUT_GRID);
 #if LV_DEMO_MUSIC_LARGE
   lv_obj_set_size(btn, lv_pct(100), 110);
 #else
   lv_obj_set_size(btn, lv_pct(100), 60);
 #endif
+  // lv_obj_set_size(cont, lv_pct(100), lv_pct(100));
+  // static lv_coord_t col_dsc[] = {LV_SIZE_CONTENT, LV_GRID_FR(1),
+  // LV_SIZE_CONTENT, LV_GRID_TEMPLATE_LAST}; static lv_coord_t row_dsc[] =
+  // {LV_SIZE_CONTENT, LV_GRID_TEMPLATE_LAST};
+
+  // lv_obj_set_grid_dsc_array(btn, col_dsc, row_dsc);
+  // lv_obj_set_layout(btn, LV_LAYOUT_GRID);
 
   lv_obj_add_style(btn, &style_btn, 0);
   lv_obj_add_style(btn, &style_button_pr, LV_STATE_PRESSED);
@@ -242,27 +279,31 @@ static lv_obj_t *add_audio_list_button(lv_obj_t *parent, const FileMeta &file) {
   lv_obj_add_event_cb(btn, audio_btn_click_event_cb, LV_EVENT_CLICKED, NULL);
 
   // lv_obj_add_state(btn, LV_STATE_DISABLED);
+  lv_obj_set_flex_flow(btn, LV_FLEX_FLOW_ROW);
+  lv_obj_set_flex_align(btn,
+                        LV_FLEX_ALIGN_START,  // 主轴起始
+                        LV_FLEX_ALIGN_CENTER, // 交叉轴垂直居中
+                        LV_FLEX_ALIGN_CENTER);
 
+  // icon, title_label, time_label 都按顺序添加就行
   lv_obj_t *icon = lv_image_create(btn);
   lv_image_set_src(icon, &img_player_list_play);
-  lv_obj_set_grid_cell(icon, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_CENTER, 0,
-                       2);
+  // 可选：固定 icon 大小
+  // lv_obj_set_size(icon, 24, 24);
+  lv_obj_set_style_pad_right(icon, 8, 0); // 图标和标题间距
 
   lv_obj_t *title_label = lv_label_create(btn);
   lv_label_set_text(title_label, title);
-  lv_obj_set_grid_cell(title_label, LV_GRID_ALIGN_START, 1, 1,
-                       LV_GRID_ALIGN_CENTER, 0, 2);
   lv_obj_add_style(title_label, &style_title, 0);
-  // lv_obj_set_style_bg_opa(title_label, LV_OPA_TRANSP, 0); //
-  // 背景透明度设置为透明
+
+  // 关键：让标题在中间伸展占满剩余空间
+  lv_obj_set_flex_grow(title_label, 1);
+  lv_obj_set_style_text_align(title_label, LV_TEXT_ALIGN_LEFT, 0);
 
   lv_obj_t *time_label = lv_label_create(btn);
   lv_label_set_text(time_label, time);
   lv_obj_add_style(time_label, &style_time, 0);
-  lv_obj_set_grid_cell(time_label, LV_GRID_ALIGN_END, 2, 1,
-                       LV_GRID_ALIGN_CENTER, 0, 2);
 
-  LV_IMAGE_DECLARE(img_player_list_border);
   lv_obj_t *border = lv_image_create(btn);
   lv_image_set_src(border, &img_player_list_border);
   lv_obj_set_width(border, lv_pct(120));
@@ -278,71 +319,59 @@ static lv_obj_t *add_audio_list_button(lv_obj_t *parent, const FileMeta &file) {
 
 lv_obj_t *player_list_create(lv_obj_t *parent) {
   LV_LOG_TRACE("player_list_create");
-  lv_style_init(&style_scrollbar);
-  lv_style_set_width(&style_scrollbar, 4);
-  lv_style_set_bg_opa(&style_scrollbar, LV_OPA_COVER);
-  lv_style_set_bg_color(&style_scrollbar, lv_color_hex3(0xeee));
-  lv_style_set_radius(&style_scrollbar, LV_RADIUS_CIRCLE);
-  lv_style_set_pad_right(&style_scrollbar, 4);
 
-  static const int32_t grid_cols[] = {LV_GRID_CONTENT, LV_GRID_FR(1),
-                                      LV_GRID_CONTENT, LV_GRID_TEMPLATE_LAST};
-#if LV_DEMO_MUSIC_LARGE
-  static const int32_t grid_rows[] = {35, 30, LV_GRID_TEMPLATE_LAST};
-#else
-  static const int32_t grid_rows[] = {22, 17, LV_GRID_TEMPLATE_LAST};
-#endif
-  lv_style_init(&style_btn);
-  lv_style_set_bg_opa(&style_btn, LV_OPA_TRANSP);
-  lv_style_set_grid_column_dsc_array(&style_btn, grid_cols);
-  lv_style_set_grid_row_dsc_array(&style_btn, grid_rows);
-  lv_style_set_grid_row_align(&style_btn, LV_GRID_ALIGN_CENTER);
-  lv_style_set_layout(&style_btn, LV_LAYOUT_GRID);
-#if LV_DEMO_MUSIC_LARGE
-  lv_style_set_pad_right(&style_btn, 30);
-#else
-  lv_style_set_pad_right(&style_btn, 20);
-#endif
-  lv_style_init(&style_button_pr);
-  lv_style_set_bg_opa(&style_button_pr, LV_OPA_COVER);
-  lv_style_set_bg_color(&style_button_pr, lv_color_hex(0x4c4965));
+  // 创建水平容器，包含 上一曲按钮 + 列表 + 下一曲按钮
+  lv_obj_t *container = lv_obj_create(parent);
+  lv_obj_remove_style_all(container);
+  lv_obj_set_flex_grow(container, 1);
+  lv_obj_set_size(container, LV_PCT(100), LV_PCT(100));
+  lv_obj_set_flex_flow(container, LV_FLEX_FLOW_ROW);
+  lv_obj_set_flex_align(container,
+                        LV_FLEX_ALIGN_SPACE_EVENLY, // 主轴
+                        LV_FLEX_ALIGN_START,        // 交叉轴
+                        LV_FLEX_ALIGN_CENTER);      // 内容
 
-  lv_style_init(&style_button_chk);
-  lv_style_set_bg_opa(&style_button_chk, LV_OPA_COVER);
-  lv_style_set_bg_color(&style_button_chk, lv_color_hex(0x4c4965));
+  // 🎵 创建上一曲按钮
+  img_prev = lv_image_create(container);
+  lv_image_set_src(img_prev, &img_player_prev); // 自己的图标变量
+  // lv_obj_set_size(img_prev, 48, 48);
+  lv_obj_set_style_margin_top(img_prev, 45, 0);
+  lv_obj_add_event_cb(img_prev, prev_btn_click_event_cb, LV_EVENT_CLICKED,
+                      NULL);
+  lv_obj_add_flag(img_prev, LV_OBJ_FLAG_CLICKABLE);
 
-  lv_style_init(&style_button_dis);
-  lv_style_set_text_opa(&style_button_dis, LV_OPA_40);
-  lv_style_set_image_opa(&style_button_dis, LV_OPA_40);
-
-  lv_style_init(&style_title);
-  lv_style_set_text_font(&style_title, LV_FONT_DEFAULT);
-  lv_style_set_text_color(&style_title, lv_color_hex(0xffffff));
-  lv_style_set_bg_opa(&style_title, LV_OPA_TRANSP);
-  // lv_style_set_bg_color(&style_title, lv_color_hex(0xffffff));
-
-  lv_style_init(&style_time);
-  lv_style_set_text_font(&style_time, LV_FONT_DEFAULT);
-  lv_style_set_text_color(&style_time, lv_color_hex(0xffffff));
-
-  /*Create an empty transparent container*/
-  list = lv_obj_create(parent);
+  // 🎼 创建列表(list)
+  list = lv_obj_create(container);
   lv_obj_remove_style_all(list);
-  // lv_obj_set_size(list, LV_HOR_RES, LV_VER_RES -
-  // LV_DEMO_MUSIC_HANDLE_SIZE); lv_obj_set_y(list,
-  // LV_DEMO_MUSIC_HANDLE_SIZE);
-  lv_obj_set_size(list, LV_PCT(90), 0);
-  lv_obj_set_flex_grow(list, 1); // 使列表撑满剩余空间
-  lv_obj_add_style(list, &style_scrollbar, LV_PART_SCROLLBAR);
+  lv_obj_set_size(list, LV_PCT(100), LV_PCT(100)); // 中间占80%
+  // lv_obj_set_height(list, LV_PCT(100));
+  lv_obj_set_flex_grow(list, 1);
   lv_obj_set_flex_flow(list, LV_FLEX_FLOW_COLUMN);
-  lv_obj_add_event_cb(list, scroll_cb, LV_EVENT_SCROLL, NULL);
+  lv_obj_add_style(list, &style_scrollbar, LV_PART_SCROLLBAR);
+  // lv_obj_add_event_cb(list, scroll_cb, LV_EVENT_SCROLL, NULL);
   lv_obj_set_scrollbar_mode(list, LV_SCROLLBAR_MODE_AUTO);
 
-  // 创建loading spinner（初始时不可见）
+  // 🎶 创建下一曲按钮
+  img_next = lv_image_create(container);
+  lv_image_set_src(img_next, &img_player_next); // 自己的图标变量
+  // lv_obj_set_size(img_next, 48, 48);
+  lv_obj_set_style_margin_top(img_next, 45, 0);
+  lv_obj_add_event_cb(img_next, next_btn_click_event_cb, LV_EVENT_CLICKED,
+                      NULL);
+  lv_obj_add_flag(img_next, LV_OBJ_FLAG_CLICKABLE);
+
+  // 🎡 创建 loading spinner
   loading_spinner = lv_spinner_create(list);
   lv_obj_set_size(loading_spinner, 40, 40);
   lv_obj_center(loading_spinner);
-  // lv_obj_add_flag(loading_spinner, LV_OBJ_FLAG_HIDDEN); // 初始隐藏
+
+// #if 1
+//   data.isFile = false;
+//   snprintf(data.fileName, sizeof(data.fileName), "Sample Track 1");
+//   data.duration = 215; // 3 minutes 35 seconds
+//   data.size = 5120;    // 5 MB
+//   add_folder_list_button(list, data);
+// #endif
   return list;
 }
 

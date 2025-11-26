@@ -7,16 +7,21 @@
 #include "ui_presenter.h"
 #include <lvgl.h>
 #include "emoji_font.h"
+#include "setting_ui.h"
 
 lv_obj_t *scr1;
 
 static lv_style_t base_style;
 static lv_style_t flex_layout_style;
+lv_obj_t *tileview;
 lv_obj_t *face_ui;
 lv_obj_t *time_ui;
 lv_obj_t *ai_ui;
 lv_obj_t *player_ui;
+lv_obj_t *setting_ui;
 UI_PAGE current_page = TIME_UI_PAGE;
+static uint8_t last_hour = 0;
+static uint8_t last_min = 0;
 
 static void main_ui_tab_changed(lv_event_t *e);
 
@@ -27,7 +32,7 @@ void main_ui() {
 
   emoji_font_init();
 
-  lv_obj_t *tileview = lv_tileview_create(scr1);
+  tileview = lv_tileview_create(scr1);
   lv_obj_set_size(tileview, LV_HOR_RES, LV_VER_RES); // Full-screen container
   lv_obj_set_scrollbar_mode(tileview, LV_SCROLLBAR_MODE_OFF);
   lv_obj_set_size(scr1, LV_HOR_RES, LV_VER_RES);
@@ -41,7 +46,8 @@ void main_ui() {
   // face_ui = lv_tileview_add_tile(tileview, 0, 0, LV_DIR_RIGHT);
   time_ui = lv_tileview_add_tile(tileview, 0, 0, LV_DIR_HOR);
   ai_ui = lv_tileview_add_tile(tileview, 1, 0, LV_DIR_HOR);
-  player_ui = lv_tileview_add_tile(tileview, 2, 0, LV_DIR_LEFT);
+  player_ui = lv_tileview_add_tile(tileview, 2, 0, LV_DIR_HOR);
+  setting_ui = lv_tileview_add_tile(tileview, 3, 0, LV_DIR_LEFT);
   lv_obj_set_style_bg_opa(tileview, LV_OPA_COVER, 0);
   lv_obj_set_style_bg_color(tileview, lv_color_hex(0x000000), 0);
 
@@ -52,6 +58,7 @@ void main_ui() {
   time_ui_page(time_ui);
   ai_ui_page(ai_ui);
   ui_player_page(player_ui);
+  setting_ui_page(setting_ui);
 
   // lv_tileview_set_tile_by_index(tileview, 2, 0, LV_ANIM_OFF);
   lv_obj_add_event_cb(tileview, main_ui_tab_changed, LV_EVENT_VALUE_CHANGED, NULL);
@@ -80,4 +87,18 @@ static void main_ui_tab_changed(lv_event_t *e) {
     current_page = TIME_UI_PAGE;
     LV_LOG_INFO("Switched to Time UI Page");
   }
+}
+/**
+ * 正点时自动跳回时间页面
+ */
+void main_ui_on_time(uint8_t hour, uint8_t min) {
+  if (min != 0 || min != 30) {
+    return;
+  }
+  if (hour == last_hour && min == last_min) {
+    return;
+  }
+  last_hour = hour;
+  last_min = min;
+  lv_tileview_set_tile(tileview, time_ui, LV_ANIM_ON);
 }

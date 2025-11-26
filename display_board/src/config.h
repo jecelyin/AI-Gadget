@@ -44,4 +44,8 @@
 #define TFT_RGB_R3 18 // 红色通道3
 #define TFT_RGB_R4 17 // 红色通道4
 
+// PWM 设置
+#define BL_FREQ     30000  // PWM 频率设为 30 kHz（大于 25kHz 建议）
+#define BL_RES      8     // 分辨率 8位 (数值范围 0-255)
+
 #define HOST_NAME        "lcd.gadget.ai"

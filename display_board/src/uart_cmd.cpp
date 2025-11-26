@@ -125,6 +125,7 @@ void handle_date_time(uint8_t *src, uint16_t length)
 {
   DateTimeStruct data;
   decode_data(data, src, length);
+  main_ui_on_time(data.hour, data.min);
   time_ui_update_datetime(data);
 }
 

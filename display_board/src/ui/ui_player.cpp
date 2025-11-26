@@ -25,16 +25,4 @@ void ui_player_page(lv_obj_t *parent) {
   create_ctrl_box(cont);
   player_list_create(cont);
 
-
-#if LV_USE_SDL
-  folders.push_back(Folder{"folder1"});
-  folders.push_back(Folder{"folder2"});
-
-  audioFiles.push_back(AudioFile{"audio1.mp3", 1024, 300});
-  audioFiles.push_back(AudioFile{"audio2.mp3", 2048, 320});
-  audioFiles.push_back(AudioFile{"audio3.mp3", 1500, 280});
-
-  ui_player_update_list();
-#endif
-
 }

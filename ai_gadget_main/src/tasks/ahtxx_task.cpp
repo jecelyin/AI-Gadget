@@ -51,14 +51,19 @@ namespace Ahtxx_Task {
         vTaskDelay(pdMS_TO_TICKS(20));  // Short delay
 
         ESP_LOGI(TAG, "######################## AHTXX - START #########################");
-        ahtxx_reset(dev_hdl);
-        vTaskDelay(pdMS_TO_TICKS(20));  // Short delay after reset
+        
+        // vTaskDelay(pdMS_TO_TICKS(20));  // Short delay after reset
+
+        // ahtxx_status_register_t s;
+        // ahtxx_get_status_register(dev_hdl, &s);
+        // printf("Status: 0x%02X, busy=%d, cal=%d\n", s.reg, s.bits.busy, s.bits.calibrated);
         // handle sensor
         float temperature, humidity;
         esp_err_t result = ahtxx_get_measurement(dev_hdl, &temperature, &humidity);
         if(result != ESP_OK) {
             ESP_LOGE(TAG, "ahtxx device read failed (%s)", esp_err_to_name(result));
         } else {
+            temperature -= 12.0f;
             data.temperature = temperature;
             *ret_temperature = temperature;
             data.humidity = humidity;

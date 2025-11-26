@@ -15,7 +15,8 @@ namespace RTC_Task
 {
     static bool sntp_initialized = false;
     static time_t epochNowTime;
-
+    uint8_t T_HOUR = 0;
+    uint8_t T_MIN = 0;
 #if USE_RTC_DS3231
 #include "ds3231.h" // 你需要提供/集成 DS3231 驱动
     extern ds3231_dev_t rtc_dev;
@@ -50,6 +51,8 @@ namespace RTC_Task
             .sec = static_cast<uint8_t>(timeinfo.tm_sec),
             .week = static_cast<uint8_t>(timeinfo.tm_wday),
             .is_pm = (timeinfo.tm_hour >= 12)};
+        T_HOUR = data.hour;
+        T_MIN = data.min;
 
         SEND_COMMAND(CMD_DATE_TIME, data);
     }

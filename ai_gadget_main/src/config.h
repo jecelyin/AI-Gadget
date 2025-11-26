@@ -1,4 +1,5 @@
 
+#include "driver/gpio.h"
 
 // I2C Pins
 #define I2C_SDA_PIN GPIO_NUM_1

@@ -28,8 +28,8 @@ esp_io_expander_handle_t io_expander = NULL;
 
 // 设置 PWM 参数
 int pwmChannel = 0;       // PWM 通道
-int pwmFrequency = 50000; // 设置 PWM 频率为 50kHz（大于 25kHz）
-int pwmResolution = 8;    // 8 位分辨率（0 - 255）
+int pwmFrequency = BL_FREQ; // 设置 PWM 频率为 50kHz（大于 25kHz）
+int pwmResolution = BL_RES;    // 8 位分辨率（0 - 255）
 int brightness = 5;       // 初始亮度（0 - 255）
 int dutyCycle = 5;        // 占空比波 0 ~ 255
 // LVGL相关
@@ -135,7 +135,7 @@ void i2c_init()
 }
 void init_io()
 {
-    pinMode(BL_PWM, OUTPUT); // 设置背光 PWM 引脚为输出模式
+    // pinMode(BL_PWM, OUTPUT); // 设置背光 PWM 引脚为输出模式
     // 启动背光
     // digitalWrite(BL_PWM, HIGH); // 打开背光使能
     // esp_io_expander_handle_t io_expander = NULL;
@@ -155,9 +155,13 @@ void init_io()
     // expander.digitalWrite(1, HIGH);
     // 设置 PWM 通道
     // bool ledcAttach(uint8_t pin, uint32_t freq, uint8_t resolution);
-    ledcAttachChannel(BL_PWM, pwmFrequency, pwmResolution, pwmChannel);
-    // ledcWrite(BL_PWM, dutyCycle);//指定通道输出一定占空比波形
-    ledcWriteChannel(pwmChannel, dutyCycle);
+    // ledcAttachChannel(BL_PWM, pwmFrequency, pwmResolution, pwmChannel);
+    // // ledcWrite(BL_PWM, dutyCycle);//指定通道输出一定占空比波形
+    // ledcWriteChannel(pwmChannel, dutyCycle);
+    if (!ledcAttach(BL_PWM, pwmFrequency, pwmResolution)) {
+        ESP_LOGE(TAG, "PWM Attach Failed!");
+    }
+    ledcWrite(BL_PWM, 0);
 }
 
 lv_disp_t *init_display()

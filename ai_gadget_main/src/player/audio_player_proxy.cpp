@@ -10,6 +10,7 @@
 #include "app_sdcard.h"
 #include "audio_player.h"
 #include <mp3dec.h>
+#include <rtc_task.h>
 
 static const char *TAG = "AudioPlayer";
 static i2s_chan_handle_t i2s_tx_chan;
@@ -162,6 +163,10 @@ uint16_t AudioPlayer::getPosition()
 
 void AudioPlayer::playFile(const char *filePath, uint16_t position)
 {
+    if (RTC_Task::T_HOUR >= 22 || RTC_Task::T_HOUR < 9) {
+        ESP_LOGI(TAG, "It's late night, not playing audio.");
+        return;
+    }
     std::string file = std::string(MOUNT_POINT) + filePath;
     fp = fopen(file.c_str(), "rb");
     ESP_ERROR_CHECK(audio_player_play(fp, position));

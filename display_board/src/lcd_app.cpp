@@ -58,7 +58,7 @@ void lcd_app_setup()
   ESP_LOGI(TAG, "Free PSRAM: %d", heap_caps_get_free_size(MALLOC_CAP_SPIRAM));
 
   // 设置背光引脚为输出
-  gpio_set_direction((gpio_num_t)BL_PWM, GPIO_MODE_OUTPUT);
+  // gpio_set_direction((gpio_num_t)BL_PWM, GPIO_MODE_OUTPUT);
 
   // 配置 PWM
   // ledc_timer_config_t ledc_timer = {
@@ -78,7 +78,7 @@ void lcd_app_setup()
   //     .duty = dutyCycle,
   //     .hpoint = 0};
   // ledc_channel_config(&ledc_channel);
-  gpio_set_level((gpio_num_t)BL_PWM, 1);
+  // gpio_set_level((gpio_num_t), 1);
 
   ESP_LOGI(TAG, "init LCD...");
   ESP_LOGI(TAG, "init LVGL...");
