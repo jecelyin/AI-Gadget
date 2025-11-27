@@ -6,6 +6,7 @@
 #include <data_struct.h>
 #include <string>
 #include <vector>
+#include "ui_lib.h"
 
 static lv_obj_t *list;
 static lv_obj_t *img_prev;
@@ -28,6 +29,7 @@ static lv_obj_t *add_audio_list_button(lv_obj_t *parent, const FileMeta &file);
 static lv_obj_t *add_folder_list_button(lv_obj_t *parent,
                                         const FileMeta &folder);
 static void load_data(uint16_t page);
+void player_test_data();
 
 static void prev_btn_click_event_cb(lv_event_t *e) {
   LV_LOG_USER("Previous track");
@@ -39,15 +41,17 @@ static void next_btn_click_event_cb(lv_event_t *e) {
   LV_LOG_USER("Next track");
   uint16_t curr_page = player_get_curr_page();
   load_data(curr_page + 1);
+  // player_test_data();
 }
 
 void player_notify_data_clear() {
-  lv_obj_t *child = lv_obj_get_child(list, 0);
-  while (child != NULL) {
-    lv_obj_t *next_child = lv_obj_get_child(list, 0);
-    lv_obj_del(child);
-    child = next_child;
-  }
+  // lv_obj_t *child = lv_obj_get_child(list, 0);
+  // while (child != NULL) {
+  //   lv_obj_t *next_child = lv_obj_get_child(list, 0);
+  //   lv_obj_del(child);
+  //   child = next_child;
+  // }
+  lv_obj_clean(list);
 }
 void player_notify_data_remove(int index) {
   lv_obj_t *child = lv_obj_get_child(list, index);
@@ -74,8 +78,6 @@ static void set_list_loading(lv_obj_t *list, bool loading) {
 
     // 禁用滚动和点击
     lv_obj_add_state(list, LV_STATE_DISABLED);
-    lv_obj_add_state(list, LV_STATE_DISABLED);
-    lv_obj_add_state(list, LV_STATE_DISABLED);
     // lv_obj_clear_flag(list, LV_OBJ_FLAG_SCROLLABLE);
   } else {
     if (loading_spinner == NULL) {
@@ -86,8 +88,6 @@ static void set_list_loading(lv_obj_t *list, bool loading) {
     lv_obj_add_flag(loading_spinner, LV_OBJ_FLAG_HIDDEN);
 
     // 启用滚动和点击
-    lv_obj_clear_state(list, LV_STATE_DISABLED);
-    lv_obj_clear_state(list, LV_STATE_DISABLED);
     lv_obj_clear_state(list, LV_STATE_DISABLED);
     // lv_obj_add_flag(list, LV_OBJ_FLAG_SCROLLABLE);
   }
@@ -361,17 +361,13 @@ lv_obj_t *player_list_create(lv_obj_t *parent) {
   lv_obj_add_flag(img_next, LV_OBJ_FLAG_CLICKABLE);
 
   // 🎡 创建 loading spinner
-  loading_spinner = lv_spinner_create(list);
-  lv_obj_set_size(loading_spinner, 40, 40);
+  loading_spinner = lv_spinner_create(parent);
+  lv_obj_set_size(loading_spinner, 80, 80);
   lv_obj_center(loading_spinner);
 
-// #if 1
-//   data.isFile = false;
-//   snprintf(data.fileName, sizeof(data.fileName), "Sample Track 1");
-//   data.duration = 215; // 3 minutes 35 seconds
-//   data.size = 5120;    // 5 MB
-//   add_folder_list_button(list, data);
-// #endif
+  // 关键：让 spinner 不参与布局，也不影响 child 索引
+  lv_obj_add_flag(loading_spinner, LV_OBJ_FLAG_IGNORE_LAYOUT);
+  lv_obj_add_flag(loading_spinner, LV_OBJ_FLAG_FLOATING); // 悬浮显示
   return list;
 }
 
@@ -386,4 +382,32 @@ void player_list_button_check(uint32_t track_id, bool state) {
     lv_obj_remove_state(btn, LV_STATE_CHECKED);
     lv_image_set_src(icon, &img_player_list_play);
   }
+}
+
+void add_row(uint16_t page, bool isFile, const char *fileName,
+             uint32_t fileSize, uint32_t duration) {
+  FileMeta fileMeta;
+  fileMeta.isFile = isFile;
+  // strncpy(fileMeta.fileName, fileName, strlen(fileName));
+  safeCopyFileName(fileMeta.fileName, sizeof(fileMeta.fileName), fileName);
+  fileMeta.duration = duration;
+  fileMeta.size = fileSize;
+  player_add_data(page, fileMeta);
+}
+void player_test_data() {
+  std::string path = "/music/album";
+  uint16_t page = 1;
+  uint16_t total_page = 2;
+  uint16_t count = 20;
+  set_list_loading(list, false);
+  player_clean_data(page);
+  add_row(page, true, "F.mp3", 10, 10);
+  add_row(page, false, "..", 0, 0);
+  add_row(page, true, "A.mp3", 10, 10);
+  add_row(page, true, "A2.mp3", 10, 10);
+  add_row(page, true, "A3.mp3", 10, 10);
+  add_row(page, false, "..", 0, 0);
+  add_row(page, false, "...", 0, 0);
+  player_flush_page(page, total_page);
+  ui_player_update_list();
 }

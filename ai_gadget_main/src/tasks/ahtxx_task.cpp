@@ -63,7 +63,7 @@ namespace Ahtxx_Task {
         if(result != ESP_OK) {
             ESP_LOGE(TAG, "ahtxx device read failed (%s)", esp_err_to_name(result));
         } else {
-            temperature -= 12.0f;
+            // temperature -= 12.0f;
             data.temperature = temperature;
             *ret_temperature = temperature;
             data.humidity = humidity;

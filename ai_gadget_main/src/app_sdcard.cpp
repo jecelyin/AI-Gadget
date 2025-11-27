@@ -158,7 +158,7 @@ void listFiles(const char *dirPath, BinaryPacker &b, bool hasParent,
 
   // list_files_with_permissions(path.c_str());
 
-  ESP_LOGD(TAG, "Scan directory: %s", path.c_str());
+  ESP_LOGI(TAG, "Scan directory: %s, has parent: %s", path.c_str(), hasParent ? "true" : "false");
   char indexPath[100] = {0};
   snprintf(indexPath, sizeof(indexPath), "%s/audio_index.bin", path.c_str());
   FILE *indexFile = fopen(indexPath, "rb");

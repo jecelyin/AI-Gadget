@@ -123,6 +123,14 @@ size_t pref_set_player_last_duration(uint16_t duration) {
     return prefs.putUShort("p_last_dur", duration);
 }
 
+int pref_get_player_last_page() {
+    return prefs.getInt("p_last_page", 1);
+}
+
+size_t pref_set_player_last_page(int page) {
+    return prefs.putInt("p_last_page", page);
+}
+
 String pref_get_ai_api_url() { return prefs.getString("ai_api_url"); }
 
 size_t pref_set_ai_api_url(const char *url) {

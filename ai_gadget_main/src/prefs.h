@@ -25,6 +25,9 @@ size_t pref_set_player_last_duration(uint16_t duration);
 String pref_get_ai_api_url();
 size_t pref_set_ai_api_url(const char* url);
 
+int pref_get_player_last_page();
+size_t pref_set_player_last_page(int page);
+
 void pref_set_wifi(const char *ssid, const char *pass);
 bool pref_get_all_wifi(std::vector<std::pair<String, String>> &credentials);
 bool pref_del_wifi(const char *ssid);

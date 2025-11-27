@@ -178,6 +178,7 @@ void handle_voice_status(uint8_t *src, uint16_t length)
   update_voice_status(data);
 }
 
+
 void handle_player_list(uint8_t *src, uint16_t length)
 {
   s.load(src, length);
@@ -198,7 +199,7 @@ void handle_player_list(uint8_t *src, uint16_t length)
     if (type == 0)
     { // 处理文件夹
       std::string folderName = s.readString();
-      strncpy(fileMeta.fileName, folderName.c_str(), sizeof(fileMeta.fileName) - 1);
+      safeCopyFileName(fileMeta.fileName, sizeof(fileMeta.fileName), folderName);
       fileMeta.isFile = false;
     }
     else if (type == 1)
@@ -207,7 +208,8 @@ void handle_player_list(uint8_t *src, uint16_t length)
       uint32_t fileSize = s.readUint32();
       uint32_t duration = s.readUint32();
 
-      strncpy(fileMeta.fileName, fileName.c_str(), sizeof(fileMeta.fileName) - 1);
+      // strncpy(fileMeta.fileName, fileName.c_str(), sizeof(fileMeta.fileName) - 1);
+      safeCopyFileName(fileMeta.fileName, sizeof(fileMeta.fileName), fileName);
       fileMeta.isFile = true;
       fileMeta.duration = duration;
       fileMeta.size = fileSize;

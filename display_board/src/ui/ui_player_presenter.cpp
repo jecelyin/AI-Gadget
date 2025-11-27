@@ -60,31 +60,31 @@ uint16_t player_data_total_page() {
 }
 
 void player_clean_data(uint16_t page) {
-  if (page == curr_page) {
+  // if (page == curr_page) {
     fileList.clear();
     pageList.clear();
     player_notify_data_clear();
-    return;
-  }
-  for (int i = pageList.size() - 1; i >= 0; --i) {
-    if (pageList[i] != page) {
-      fileList.erase(fileList.begin() + i);
-      pageList.erase(pageList.begin() + i);
-      player_notify_data_remove(i);
-    }
-  }
+  //   return;
+  // }
+  // for (int i = pageList.size() - 1; i >= 0; --i) {
+  //   if (pageList[i] != page) {
+  //     fileList.erase(fileList.begin() + i);
+  //     pageList.erase(pageList.begin() + i);
+  //     player_notify_data_remove(i);
+  //   }
+  // }
 }
 
 void player_add_data(uint16_t page, FileMeta &data) {
-  if (page < curr_page) {
-    fileList.push_front(data);
-    pageList.push_front(page);
-    player_notify_data_add_front(data);
-  } else {
+  // if (page < curr_page) {
+  //   fileList.push_front(data);
+  //   pageList.push_front(page);
+  //   player_notify_data_add_front(data);
+  // } else {
     fileList.push_back(data);
     pageList.push_back(page);
     player_notify_data_add_back(data);
-  }
+  // }
 }
 
 FileMeta *player_get_data(int index) {
@@ -103,3 +103,4 @@ int player_data_size() { return fileList.size(); }
 uint16_t player_get_curr_page() { return curr_page; }
 
 uint16_t player_get_total_page() { return s_total_page; }
+

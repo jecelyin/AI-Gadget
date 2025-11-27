@@ -11,6 +11,8 @@
 #include "audio_player.h"
 #include <mp3dec.h>
 #include <rtc_task.h>
+#include <cmd.h>
+#include <uart_cmd.h>
 
 static const char *TAG = "AudioPlayer";
 static i2s_chan_handle_t i2s_tx_chan;
@@ -163,8 +165,14 @@ uint16_t AudioPlayer::getPosition()
 
 void AudioPlayer::playFile(const char *filePath, uint16_t position)
 {
-    if (RTC_Task::T_HOUR >= 22 || RTC_Task::T_HOUR < 9) {
+    uint8_t hour = RTC_Task::T_HOUR;
+    if (hour >= 23 || hour < 9 || (hour >= 17 && hour < 22)) {
         ESP_LOGI(TAG, "It's late night, not playing audio.");
+        BinaryPacker binary_packer;
+        binary_packer.writeString("休息时间不播放音频");
+        binary_packer.writeUint32(5000);
+        SEND_BUFFER(binary_packer, CMD_SET_NOTIFICATION);
+        binary_packer.clear();
         return;
     }
     std::string file = std::string(MOUNT_POINT) + filePath;

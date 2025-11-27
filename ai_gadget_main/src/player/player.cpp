@@ -15,6 +15,7 @@ String last_path;
 String last_audio;
 uint16_t last_position;
 uint16_t last_duration;
+int last_page = 1;
 AudioPlayer player;
 static fs::FS SD = fs::FS();
 bool is_pause = false;
@@ -56,6 +57,7 @@ static void send_file_list(String &path, uint16_t page) {
   s.writeUint16(page);
 
   listFiles(full_path.c_str(), s, path.length() > 1, page);
+  last_page = page;
   // log_d("send file list, s.available = %d, s.size = %d, s.offset = %d", s.available(), s.size(), s.getOffset());
   SEND_BUFFER(s, CMD_PLAYER_FILES_RESP);
 }
@@ -75,7 +77,7 @@ void handle_player_get_last(uint8_t *src, uint16_t length) {
   s.writeUint16(last_duration);
   SEND_BUFFER(s, CMD_PLAYER_LAST_RESP);
 
-  send_file_list(last_path, 1);
+  send_file_list(last_path, pref_get_player_last_page());
 }
 
 void handle_player_load(uint8_t *src, uint16_t length) {
@@ -121,6 +123,7 @@ void handle_player_load_and_play(uint8_t *src, uint16_t length) {
   pref_set_player_last_path(last_path.c_str());
   pref_set_player_last_audio(data.name);
   pref_set_player_last_duration(player.getPosition());
+  pref_set_player_last_page(last_page);
 }
 
 void handle_player_play(uint8_t *src, uint16_t length) {
