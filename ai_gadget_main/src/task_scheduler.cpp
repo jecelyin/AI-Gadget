@@ -15,8 +15,8 @@ static const char *TAG = "TaskScheduler";
 // ============ 配置参数 ============
 #define WIFI_CHECK_INTERVAL 10000        // WiFi 状态检查间隔（毫秒）
 #define RTC_SYNC_INTERVAL 10000          // RTC 同步间隔（1 小时）
-#define SGP41_UPDATE_INTERVAL 10000      // SGP41 更新间隔（1 分钟）
-#define TEMP_HUMID_UPDATE_INTERVAL 10000 // 温湿度更新间隔（1 分钟）
+#define SGP41_UPDATE_INTERVAL 30000      // SGP41 更新间隔（1 分钟）
+#define TEMP_HUMID_UPDATE_INTERVAL 60000 // 温湿度更新间隔（1 分钟）
 #define BATTERY_UPDATE_INTERVAL 300000   // 电量更新间隔（5 分钟）
 #define LIGHT_CHECK_INTERVAL 1000        // 光线判断间隔（1 秒）
 #define WEATHER_UPDATE_INTERVAL 1800000  // 天气更新间隔（30 分钟）

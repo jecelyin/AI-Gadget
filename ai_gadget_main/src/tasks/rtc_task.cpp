@@ -7,6 +7,8 @@
 #include <time.h>
 #include <sys/time.h>
 #include "wifi_utils.h"
+#include "driver/gpio.h"
+#include "config.h"
 
 #define TAG "RTC_Task"
 #define RTC_UPDATE_INTERVAL_MS (10 * 1000)
@@ -53,6 +55,11 @@ namespace RTC_Task
             .is_pm = (timeinfo.tm_hour >= 12)};
         T_HOUR = data.hour;
         T_MIN = data.min;
+        if (T_HOUR >= 0 && T_HOUR <= 6)
+        {
+            gpio_set_level(LCD_EN_PIN, 0);
+        }
+        
 
         SEND_COMMAND(CMD_DATE_TIME, data);
     }
